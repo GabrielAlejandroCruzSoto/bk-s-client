@@ -1,12 +1,15 @@
 package cl.gabrielcrsoto.bksclient.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name="tbl_address")
 public class Address {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator="gen-tbl-address")
+    @GenericGenerator(name="gen-tbl-address", strategy = "uuid")
     private String id;
 
     @Column

@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ClientServiceImpl implements IClientService {
+
     @Autowired
     private IClientRepository clientRepository;
 
@@ -41,7 +43,7 @@ public class ClientServiceImpl implements IClientService {
 
     @Override
     public List<Client> findByRut(String rut) {
-        List<Client> lstClient =this.findByRut(rut);
+        List<Client> lstClient =this.findByRut(rut).stream().collect(Collectors.toList());
         if(lstClient.size() == 0){
             throw new ClientNotFoundException("Client Not Found. The client was not found by the RUT");
         }
@@ -50,7 +52,7 @@ public class ClientServiceImpl implements IClientService {
 
     @Override
     public List<Client> findByNameAndLastName(String name, String lastName) {
-        List<Client> lstClient =this.findByNameAndLastName(name,lastName);
+        List<Client> lstClient =this.findByNameAndLastName(name,lastName).stream().collect(Collectors.toList());
         if(lstClient.size() == 0){
             throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
         }

@@ -1,5 +1,7 @@
 package cl.gabrielcrsoto.bksclient.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import java.sql.Date;
 import java.util.List;
@@ -8,7 +10,8 @@ import java.util.List;
 @Table(name = "tbl_client")
 public class Client {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator="gen-tbl-client")
+    @GenericGenerator(name="gen-tbl-client", strategy = "uuid")
     private String id;
 
     @Column
@@ -29,7 +32,7 @@ public class Client {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Address> lstAddress;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Phone> lstPhone;
 
     public String getId() {
@@ -95,4 +98,5 @@ public class Client {
     public void setLstPhone(List<Phone> lstPhone) {
         this.lstPhone = lstPhone;
     }
+
 }
