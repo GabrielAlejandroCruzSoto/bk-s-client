@@ -14,7 +14,7 @@ public class Client {
     @GenericGenerator(name="gen-tbl-client", strategy = "uuid")
     private String id;
 
-    @Column
+    @Column(unique = true)
     private String rut;
 
     @Column
@@ -24,7 +24,10 @@ public class Client {
     private String lastName;
 
     @Column
-    private Date dateBirthday;
+    private Date dateBirth;
+
+    @Column
+    private String email;
 
     @Column
     private String sex;
@@ -34,6 +37,14 @@ public class Client {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Phone> lstPhone;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getId() {
         return id;
@@ -67,12 +78,12 @@ public class Client {
         this.lastName = lastName;
     }
 
-    public Date getDateBirthday() {
-        return dateBirthday;
+    public Date getDateBirth() {
+        return dateBirth;
     }
 
-    public void setDateBirthday(Date dateBirthday) {
-        this.dateBirthday = dateBirthday;
+    public void setDateBirth(Date dateBirth) {
+        this.dateBirth = dateBirth;
     }
 
     public String getSex() {

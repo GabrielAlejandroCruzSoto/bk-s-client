@@ -3,7 +3,7 @@ package cl.gabrielcrsoto.bksclient.exception;
 public class ClientNotFoundException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    ClientNotFoundException(){
+    public ClientNotFoundException(){
         super();
     }
 
@@ -11,7 +11,7 @@ public class ClientNotFoundException extends RuntimeException {
         super(message);
     }
 
-    ClientNotFoundException(String message, Throwable cause){
+    public ClientNotFoundException(String message, Throwable cause){
         super(message, cause);
     }
 

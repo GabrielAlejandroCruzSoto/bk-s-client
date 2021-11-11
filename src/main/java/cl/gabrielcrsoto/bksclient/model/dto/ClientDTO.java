@@ -1,12 +1,18 @@
 package cl.gabrielcrsoto.bksclient.model.dto;
 
+import cl.gabrielcrsoto.bksclient.exception.BksClientException;
+import cl.gabrielcrsoto.bksclient.service.impl.ClientServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.TimeZone;
 
 public class ClientDTO {
+    private static final Logger logger = LoggerFactory.getLogger(ClientDTO.class);
+
     private static final SimpleDateFormat dateFormat
             = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -14,10 +20,15 @@ public class ClientDTO {
     private String rut;
     private String name;
     private String lastName;
-    private String dateBirthday;
+    private String dateBirth;
     private String sex;
+    private String email;
     private List<AddressDTO> lstAddress;
     private List<PhoneDTO> lstPhone;
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
 
     public String getId() {
         return id;
@@ -51,12 +62,12 @@ public class ClientDTO {
         this.lastName = lastName;
     }
 
-    public String getDateBirthday() {
-        return dateBirthday;
+    public String getDateBirth() {
+        return dateBirth;
     }
 
-    public void setDateBirthday(String dateBirthday) {
-        this.dateBirthday = dateBirthday;
+    public void setDateBirth(String dateBirth) {
+        this.dateBirth = dateBirth;
     }
 
     public String getSex() {
@@ -84,12 +95,25 @@ public class ClientDTO {
     }
 
 
-    public Date getDateBirthdayToDate() throws ParseException {
-        Date parse = new Date(dateFormat.parse(this.dateBirthday).getTime()); ;
+    public Date getDateBirthToDate() throws ParseException {
+        Date parse = null;
+        try{
+            parse = new Date(dateFormat.parse(this.dateBirth).getTime()); ;
+        }catch(Exception exception){
+            logger.error("Exception ->" + exception.getMessage());
+            logger.error("Cause ->" + exception.getCause().getMessage());
+            throw new BksClientException("Date birth with invalidate format");
+        }
         return parse;
     }
 
-    public void setDateBirthdayInDate(Date dateBirthday) {
-        this.dateBirthday = this.dateFormat.format(new java.util.Date(dateBirthday.getTime()));
+    public void setDateBirthInDate(Date dateBirth) {
+        try{
+            this.dateBirth = this.dateFormat.format(new java.util.Date(dateBirth.getTime()));
+        }catch(Exception exception){
+            logger.error("Exception ->" + exception.getMessage());
+            logger.error("Cause ->" + exception.getCause().getMessage());
+            throw new BksClientException("Date birth with invalidate format");
+        }
     }
 }

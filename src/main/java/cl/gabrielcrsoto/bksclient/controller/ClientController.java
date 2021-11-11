@@ -81,20 +81,20 @@ public class ClientController {
     }
 
     @DeleteMapping("client/delete")
-    public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteById(@RequestParam(name = "id")String id) {
         this.clientService.deleteById(id);
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     private Client convertToClient(ClientDTO clientDTO) throws ParseException {
         Client client = modelMapper.map(clientDTO, Client.class);
-        client.setDateBirthday(clientDTO.getDateBirthdayToDate());
+        client.setDateBirth(clientDTO.getDateBirthToDate());
         return client;
     }
 
     private ClientDTO convertToClientDTO(Client client) {
         ClientDTO clientDTO = modelMapper.map(client, ClientDTO.class);
-        clientDTO.setDateBirthdayInDate(client.getDateBirthday());
+        clientDTO.setDateBirthInDate(client.getDateBirth());
         return clientDTO;
     }
 }
