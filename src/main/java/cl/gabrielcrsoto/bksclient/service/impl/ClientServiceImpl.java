@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,80 +29,156 @@ public class ClientServiceImpl implements IClientService {
 
     @Override
     public Client save(Client client) {
+        try {
+            if (!this.validateRUT(client.getRut())) {
+                throw new BksClientException("RUT invalidate");
+            }
+            if (this.existsClientByRUT(client.getRut())) {
+                throw new ClientFoundException("The client's rut already exists");
+            }
+        } catch (BksClientException bksClientException) {
 
-        if(!this.validateRUT(client.getRut())){
-            throw new BksClientException("RUT invalidate");
+            logger.error(bksClientException.getMessage());
+            throw bksClientException;
+        } catch (ClientFoundException clientFoundException) {
+
+            logger.error(clientFoundException.getMessage());
+            throw clientFoundException;
+        } catch (Exception exception) {
+
+            logger.error(exception.getMessage());
+            logger.error("Failed to save client");
+            throw new BksClientException("Failed to save client");
         }
-        if(this.existsClientByRUT(client.getRut())){
-            throw new ClientFoundException("The client's rut already exists");
-        }
+
         return this.clientRepository.save(client);
     }
 
     @Override
-    public Client update(Client client) {
+    public Client update(Client inClient) {
+        Client outClient = null;
+        try {
+            if (!this.existsClientByRUT(inClient.getRut())) {
+                throw new ClientNotFoundException("The Client with the rut Does not exist");
+            }
+            if (this.findByNameAndLastName(inClient.getName(), inClient.getLastName()).size() == 0) {
+                throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
+            }
+            if (this.findByRut(inClient.getRut()).size() > 1) {
+                throw new BksClientException("Error in DB exists 2 Client with RUT");
+            }
+            String idClient = this.findByRut(inClient.getRut()).get(0).getId();
+            inClient.setId(idClient);
+            outClient = this.clientRepository.save(inClient);
 
-        if(!this.existsClientByRUT(client.getRut())){
-            throw new ClientFoundException("The Client with the rut Does not exist");
+        } catch (BksClientException bksClientException) {
+
+            logger.error(bksClientException.getMessage());
+            throw bksClientException;
+        } catch (ClientFoundException clientFoundException) {
+
+            logger.error(clientFoundException.getMessage());
+            throw clientFoundException;
+        } catch (Exception exception) {
+
+            logger.error(exception.getMessage());
+            logger.error("Failed to update client");
+            throw new BksClientException("Failed to update client");
         }
 
-        if(this.findByNameAndLastName(client.getName(),client.getLastName()).size() == 0){
-            throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
-        }
-        this.clientRepository.
-        return this.clientRepository.save(client);
+        return outClient;
     }
 
     @Override
     public List<Client> findAll() {
         List<Client> lstClient = new ArrayList<>();
-        this.clientRepository.findAll().iterator().forEachRemaining(lstClient::add);
-        if(lstClient.size()==0){
-            throw new ClientNotFoundException("Client Not Found.");
+        try {
+            this.clientRepository.findAll().iterator().forEachRemaining(lstClient::add);
+            if (lstClient.size() == 0) {
+                throw new ClientNotFoundException("Client Not Found.");
+            }
+        } catch (ClientNotFoundException clientNotFoundException) {
+            logger.error(clientNotFoundException.getMessage());
+            throw clientNotFoundException;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            logger.error("Failed to get all clients");
+            throw new BksClientException("Failed to get all clients");
         }
+
         return lstClient;
     }
 
     @Override
     public List<Client> findByRut(String rut) {
-        Collection<Client> collectorsClient = this.clientRepository.findByRut(rut);
-        if(collectorsClient== null){
-            throw new ClientNotFoundException("Client Not Found. The client was not found by the RUT");
-        }
-        if (collectorsClient.isEmpty()){
-            throw new ClientNotFoundException("Client Not Found. The client was not found by the RUT");
-        }
-        List<Client> lstClient =collectorsClient.stream().collect(Collectors.toList());
+        List<Client> lstClient = null;
+        try {
+            Collection<Client> collectorsClient = this.clientRepository.findByRut(rut);
+            if (collectorsClient == null) {
+                throw new ClientNotFoundException("Client Not Found. The client was not found by the RUT");
+            }
+            if (collectorsClient.isEmpty()) {
+                throw new ClientNotFoundException("Client Not Found. The client was not found by the RUT");
+            }
+            lstClient = collectorsClient.stream().collect(Collectors.toList());
 
+        } catch (ClientNotFoundException clientNotFoundException) {
+            logger.error(clientNotFoundException.getMessage());
+            throw clientNotFoundException;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            logger.error("Failed to get clients by RUT");
+            throw new BksClientException("Failed to get clients by RUT");
+        }
         return lstClient;
     }
 
     @Override
     public List<Client> findByNameAndLastName(String name, String lastName) {
 
-        Collection<Client> collectorsClient = this.clientRepository.findByNameAndLastName(name,lastName);
-        if(collectorsClient== null){
-            throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
+        List<Client> lstClient = null;
+        try {
+            Collection<Client> collectorsClient = this.clientRepository.findByNameAndLastName(name, lastName);
+            if (collectorsClient == null) {
+                throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
+            }
+            if (collectorsClient.isEmpty()) {
+                throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
+            }
+            lstClient = collectorsClient.stream().collect(Collectors.toList());
+        } catch (ClientNotFoundException clientNotFoundException) {
+            logger.error(clientNotFoundException.getMessage());
+            throw clientNotFoundException;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            logger.error("Failed to get clients by Name and LastName");
+            throw new BksClientException("Failed to get clients by Name and LastName");
         }
-        if (collectorsClient.isEmpty()){
-            throw new ClientNotFoundException("Client Not Found. The client was not found by the NAME and LAST NAME");
-        }
-        List<Client> lstClient =collectorsClient.stream().collect(Collectors.toList());
-
         return lstClient;
     }
 
     @Override
     public void deleteById(String id) {
-        this.clientRepository.deleteById(id);
+        try{
+            this.clientRepository.deleteById(id);
+            throw new ClientNotFoundException("Clent Not Found.");
 
-        throw new ClientNotFoundException("Client Not Found.");
+        } catch (ClientNotFoundException clientNotFoundException) {
+            logger.error(clientNotFoundException.getMessage());
+            throw clientNotFoundException;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            logger.error("Failed to get clients by Name and LastName");
+            throw new BksClientException("Failed to get clients by Name and LastName");
+        }
+
     }
 
-    private boolean validateRUT(String rut){
+    private boolean validateRUT(String rut) {
+
         boolean isValidate = false;
         try {
-            rut =  rut.toUpperCase();
+            rut = rut.toUpperCase();
             rut = rut.replace(".", "");
             rut = rut.replace("-", "");
             int rutAux = Integer.parseInt(rut.substring(0, rut.length() - 1));
@@ -125,12 +202,13 @@ public class ClientServiceImpl implements IClientService {
         }
         return isValidate;
     }
-    private boolean existsClientByRUT(String rut){
+
+    private boolean existsClientByRUT(String rut) {
         boolean isExists = false;
         Collection<Client> collectorsClient = this.clientRepository.findByRut(rut);
-        if(collectorsClient== null ||  collectorsClient.isEmpty()){
+        if (collectorsClient == null || collectorsClient.isEmpty()) {
             isExists = false;
-        }else{
+        } else {
             isExists = true;
         }
         return isExists;

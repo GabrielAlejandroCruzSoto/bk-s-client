@@ -66,7 +66,7 @@ public class ClientController {
             @RequestParam(required = false, name = "rut") String rut) {
         List<ClientDTO> lstClientDTO = new ArrayList<>();
 
-        if (rut == null) {
+        if (rut != null) {
             lstClientDTO = this.clientService.findByRut(rut)
                     .stream()
                     .map(this::convertToClientDTO)
